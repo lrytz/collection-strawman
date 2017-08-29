@@ -42,6 +42,9 @@ final class IterableOnceExtensionMethods[A](private val it: IterableOnce[A]) ext
     case _ => it.iterator().foreach(f)
   }
 
+  @deprecated("Use factory.from(it) instead of it.to(factory) for IterableOnce", "2.13.0")
+  def to[C1](factory: Factory[A, C1]): C1 = factory.fromSpecific(it)
+
   @deprecated("Use ArrayBuffer.from(it) instead of it.toBuffer", "2.13.0")
   def toBuffer[B >: A]: mutable.Buffer[B] = mutable.ArrayBuffer.from(it)
 
