@@ -77,6 +77,7 @@ class StringBuilder(private val sb: java.lang.StringBuilder) extends Builder[Cha
   with IndexedSeq[Char]
   with IndexedSeqOps[Char, IndexedSeq, StringBuilder]
   with IndexedOptimizedSeq[Char]
+  with java.lang.CharSequence
   with Serializable {
 
   def this() = this(new java.lang.StringBuilder)
@@ -87,13 +88,13 @@ class StringBuilder(private val sb: java.lang.StringBuilder) extends Builder[Cha
 
   // Methods required to make this an IndexedSeq:
   def apply(i: Int): Char = sb.charAt(i)
+
   def iterableFactory: strawman.collection.SeqFactory[IndexedSeq] = IndexedSeq
   protected[this] def fromSpecificIterable(coll: strawman.collection.Iterable[Char]): StringBuilder =
     new StringBuilder() ++= coll
   protected[this] def newSpecificBuilder(): strawman.collection.mutable.Builder[Char, StringBuilder] =
     IndexedSeq.newBuilder[Char]().mapResult(r => new StringBuilder() ++= r)
 
-  //TODO In the old collections, StringBuilder extends Seq -- should it do the same here to get this method?
   def length: Int = sb.length()
 
   def addOne(x: Char) = { sb.append(x); this }
@@ -310,4 +311,119 @@ class StringBuilder(private val sb: java.lang.StringBuilder) extends Builder[Cha
   def setLength(len: Int): Unit = sb.setLength(len)
 
   def update(idx: Int, elem: Char): Unit = sb.setCharAt(idx, elem)
+
+
+  /** Like reverse, but destructively updates the target StringBuilder.
+   *
+   *  @return   the reversed StringBuilder (same as the target StringBuilder)
+   */
+  def reverseContents(): StringBuilder = {
+    sb.reverse()
+    this
+  }
+
+
+  /** Returns the current capacity, which is the size of the underlying array.
+   *  A new array will be allocated if the current capacity is exceeded.
+   *
+   *  @return  the capacity
+   */
+  def capacity: Int = sb.capacity()
+
+  /** Ensure that the capacity is at least the given argument.
+   *  If the argument is greater than the current capacity, new
+   *  storage will be allocated with size equal to the given
+   *  argument or to `(2 * capacity + 2)`, whichever is larger.
+   *
+   *  @param newCapacity    the minimum desired capacity.
+   */
+  def ensureCapacity(newCapacity: Int) { sb.ensureCapacity(newCapacity) }
+
+  /** Returns the Char at the specified index, counting from 0 as in Arrays.
+   *
+   *  @param  index   the index to look up
+   *  @return         the Char at the given index.
+   *  @throws IndexOutOfBoundsException  if the index is out of bounds.
+   */
+  def charAt(index: Int): Char = sb.charAt(index)
+
+  /** Removes the Char at the specified index.  The sequence is
+   *  shortened by one.
+   *
+   *  @param  index  The index to remove.
+   *  @return        This StringBuilder.
+   *  @throws IndexOutOfBoundsException  if the index is out of bounds.
+   */
+  def deleteCharAt(index: Int): StringBuilder = {
+    sb.deleteCharAt(index)
+    this
+  }
+
+  /** Update the sequence at the given index to hold the specified Char.
+   *
+   *  @param  index   the index to modify.
+   *  @param  ch      the new Char.
+   *  @throws IndexOutOfBoundsException  if the index is out of bounds.
+   */
+  def setCharAt(index: Int, ch: Char): Unit = sb.setCharAt(index, ch)
+
+  /** Returns a new String made up of a subsequence of this sequence,
+   *  beginning at the given index and extending to the end of the sequence.
+   *
+   *  target.substring(start)  is equivalent to  target.drop(start)
+   *
+   *  @param  start  The starting index, inclusive.
+   *  @return        The new String.
+   *  @throws IndexOutOfBoundsException  if the index is out of bounds.
+   */
+  def substring(start: Int): String = substring(start, length)
+
+  /** Returns a new String made up of a subsequence of this sequence,
+   *  beginning at the start index (inclusive) and extending to the
+   *  end index (exclusive).
+   *
+   *  target.substring(start, end)  is equivalent to  target.slice(start, end).mkString
+   *
+   *  @param  start  The beginning index, inclusive.
+   *  @param  end    The ending index, exclusive.
+   *  @return The new String.
+   *  @throws StringIndexOutOfBoundsException If either index is out of bounds,
+   *          or if start > end.
+   */
+  def substring(start: Int, end: Int): String = sb.substring(start, end)
+
+  /** For implementing CharSequence.
+   */
+  def subSequence(start: Int, end: Int): java.lang.CharSequence =
+    substring(start, end)
+
+  /** Finds the index of the first occurrence of the specified substring.
+   *
+   *  @param    str       the target string to search for
+   *  @return             the first applicable index where target occurs, or -1 if not found.
+   */
+  def indexOf(str: String): Int = sb.indexOf(str)
+
+  /** Finds the index of the first occurrence of the specified substring.
+   *
+   *  @param    str       the target string to search for
+   *  @param    fromIndex the smallest index in the source string to consider
+   *  @return             the first applicable index where target occurs, or -1 if not found.
+   */
+  def indexOf(str: String, fromIndex: Int): Int = sb.indexOf(str, fromIndex)
+
+  /** Finds the index of the last occurrence of the specified substring.
+   *
+   *  @param    str       the target string to search for
+   *  @return             the last applicable index where target occurs, or -1 if not found.
+   */
+  def lastIndexOf(str: String): Int = sb.lastIndexOf(str)
+
+  /** Finds the index of the last occurrence of the specified substring.
+   *
+   *  @param    str       the target string to search for
+   *  @param    fromIndex the smallest index in the source string to consider
+   *  @return             the last applicable index where target occurs, or -1 if not found.
+   */
+  def lastIndexOf(str: String, fromIndex: Int): Int = sb.lastIndexOf(str, fromIndex)
 }
