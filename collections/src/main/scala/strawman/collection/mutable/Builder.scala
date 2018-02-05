@@ -75,6 +75,7 @@ trait Builder[-A, +To] extends Growable[A] { self =>
 
 class StringBuilder(private val sb: java.lang.StringBuilder) extends Builder[Char, String]
   with IndexedSeq[Char]
+  with IndexedSeqOps[Char, IndexedSeq, StringBuilder]
   with IndexedOptimizedSeq[Char]
   with Serializable {
 
@@ -87,10 +88,10 @@ class StringBuilder(private val sb: java.lang.StringBuilder) extends Builder[Cha
   // Methods required to make this an IndexedSeq:
   def apply(i: Int): Char = sb.charAt(i)
   def iterableFactory: strawman.collection.SeqFactory[IndexedSeq] = IndexedSeq
-  protected[this] def fromSpecificIterable(coll: strawman.collection.Iterable[Char]): IndexedSeq[Char] =
-    iterableFactory.from(coll)
-  protected[this] def newSpecificBuilder(): strawman.collection.mutable.Builder[Char, IndexedSeq[Char]] =
-    iterableFactory.newBuilder()
+  protected[this] def fromSpecificIterable(coll: strawman.collection.Iterable[Char]): StringBuilder =
+    new StringBuilder() ++= coll
+  protected[this] def newSpecificBuilder(): strawman.collection.mutable.Builder[Char, StringBuilder] =
+    IndexedSeq.newBuilder[Char]().mapResult(r => new StringBuilder() ++= r)
 
   //TODO In the old collections, StringBuilder extends Seq -- should it do the same here to get this method?
   def length: Int = sb.length()
