@@ -1070,9 +1070,6 @@ trait IterableOps[+A, +CC[_], +C] extends Any with IterableOnce[A] {
   /** Alias for `concat` */
   @`inline` final def ++ [B >: A](suffix: Iterable[B]): CC[B] = concat(suffix)
 
-  @deprecated("Consider requiring a Seq (for Seq.:+) or fall back to Iterable.++ ", "2.13.0")
-  @`inline` final def + [B >: A](elem: B): CC[B] = fromIterable(View.Append(toIterable, elem))
-
   /** Returns a $coll formed from this $coll and another iterable collection
     *  by combining corresponding elements in pairs.
     *  If one of the two collections is longer than the other, its remaining elements are ignored.
