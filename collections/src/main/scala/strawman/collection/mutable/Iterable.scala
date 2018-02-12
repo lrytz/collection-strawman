@@ -17,6 +17,9 @@ trait IterableOps[A, +CC[X], +C]
   extends collection.IterableOps[A, CC, C] {
 
   def mapInPlace(f: A => A): this.type
+
+  @deprecated("Use `mapInPlace` instead", "2.13.0")
+  @`inline`final def transform(f: A => A): this.type = mapInPlace(f)
 }
 
 /**
