@@ -61,7 +61,10 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
   }
 
   @throws[ArrayIndexOutOfBoundsException]
-  def apply(n: Int) = array(n).asInstanceOf[A]
+  def apply(n: Int) = {
+    if (n >= end) throw new IndexOutOfBoundsException(n.toString)
+    array(n).asInstanceOf[A]
+  }
 
   def update(n: Int, elem: A): Unit = array(n) = elem.asInstanceOf[AnyRef]
 
