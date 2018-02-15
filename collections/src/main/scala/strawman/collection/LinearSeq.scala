@@ -55,7 +55,7 @@ trait LinearSeqOps[+A, +CC[X] <: LinearSeq[X], +C <: LinearSeq[A]] extends Any w
   // Optimized version of `drop` that avoids copying
   override def drop(n: Int): C = {
     def loop(n: Int, s: Iterable[A]): C =
-      if (n <= 0) s.asInstanceOf[C]
+      if (n <= 0 || s.isEmpty) s.asInstanceOf[C]
       // implicit contract to guarantee success of asInstanceOf:
       //   (1) coll is of type C[A]
       //   (2) The tail of a LinearSeq is of the same type as the type of the sequence itself
