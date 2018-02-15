@@ -69,6 +69,11 @@ object LongMap {
       else LongMap.Bin[S](prefix, mask, left, right)
     }
   }
+
+  def newBuilder[V](): Builder[(Long, V), LongMap[V]] =
+    new ImmutableBuilder[(Long, V), LongMap[V]](empty) {
+      def addOne(elem: (Long, V)): this.type = { elems = elems + elem; this }
+    }
 }
 
 // Iterator over a non-empty LongMap.
@@ -147,13 +152,16 @@ sealed abstract class LongMap[+T] extends Map[Long, T]
   with MapOps[Long, T, Map, LongMap[T]]
   with StrictOptimizedIterableOps[(Long, T), Iterable, LongMap[T]] {
 
-  protected[this] def fromSpecificIterable(coll: strawman.collection.Iterable[(Long, T)]): LongMap[T] = {
-    //TODO should this be the default implementation of this method in StrictOptimizedIterableOps?
-    val b = newSpecificBuilder()
+  protected[this] def fromSpecificIterable(coll: scala.collection.Iterable[(Long, T)]): LongMap[T] =
+    longMapFromIterable[T](coll)
+
+  protected[this] def longMapFromIterable[V2](coll: scala.collection.Iterable[(Long, V2)]): LongMap[V2] = {
+    val b = LongMap.newBuilder[V2]()
     b.sizeHint(coll)
     b.addAll(coll)
     b.result()
   }
+
   def iterableFactory: IterableFactory[Iterable] = Iterable
   protected[this] def newSpecificBuilder(): Builder[(Long, T), LongMap[T]] =
     new ImmutableBuilder[(Long, T), LongMap[T]](empty) {
@@ -282,6 +290,13 @@ sealed abstract class LongMap[+T] extends Map[Long, T]
       else join(key, LongMap.Tip(key, value), key2, this)
     case LongMap.Nil => LongMap.Tip(key, value)
   }
+
+  def map[V2](f: ((Long, T)) => (Long, V2)): LongMap[V2] = longMapFromIterable(View.Map(toIterable, f))
+
+  def flatMap[V2](f: ((Long, T)) => IterableOnce[(Long, V2)]): LongMap[V2] = longMapFromIterable(View.FlatMap(toIterable, f))
+
+  override def concat [V1 >: T](that: collection.Iterable[(Long, V1)]): LongMap[V1] =
+    super.concat(that).asInstanceOf[LongMap[V1]] // Already has corect type but not declared as such
 
   /**
     * Updates the map, using the provided function to resolve conflicts if the key is already present.
